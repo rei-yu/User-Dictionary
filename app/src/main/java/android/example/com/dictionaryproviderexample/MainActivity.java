@@ -21,8 +21,7 @@ import android.os.Bundle;
 import android.provider.UserDictionary;
 import android.provider.UserDictionary.Words;
 import android.support.v7.app.ActionBarActivity;
-import android.widget.ListView;
-import android.support.v4.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 
 /**
  * This is the central activity for the Provider Dictionary Example App. The purpose of this app is
@@ -47,7 +46,7 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         // Get the TextView which will be populated with the Dictionary ContentProvider data.
-        ListView dictListView = (ListView) findViewById(R.id.dictionary_list_view);
+        TextView dictTextView = (TextView) findViewById(R.id.dictionary_view);
 
         // Get the ContentResolver which will send a message to the ContentProvider.
         ContentResolver resolver = getContentResolver();
@@ -55,15 +54,34 @@ public class MainActivity extends ActionBarActivity {
         // Get a Cursor containing all of the rows in the Words table.
         Cursor cursor = resolver.query(UserDictionary.Words.CONTENT_URI, null, null, null, null);
 
-        // Set the Adapter to fill the standard two_line_list_item layout with data from the Cursor.
-        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
-                android.R.layout.two_line_list_item,
-                cursor,
-                COLUMNS_TO_BE_BOUND,
-                LAYOUT_ITEMS_TO_FILL,
-                0);
+        try {
+            dictTextView.setText("The User Dictionary contains ");
+            dictTextView.append("COLUMNS: " + Words._ID + " - " + Words.FREQUENCY +
+                    " - " + Words.WORD);
 
-        // Attach the adapter to the ListView.
-        dictListView.setAdapter(adapter);
+            int idColumn = cursor.getColumnIndex(UserDictionary.Words._ID);
+            int frequencyColumn = cursor.getColumnIndex(UserDictionary.Words.FREQUENCY);
+            int wordColumn = cursor.getColumnIndex(UserDictionary.Words.WORD);
+
+            while (cursor.moveToNext()) {
+                int id = cursor.getInt(idColumn);
+                int frequency = cursor.getInt(frequencyColumn);
+                String word = cursor.getString(wordColumn);
+                dictTextView.append("\n" + id + " - " + frequency + " - " + word);
+            }
+        } finally {
+            cursor.close();
+        }
+
+//        // Set the Adapter to fill the standard two_line_list_item layout with data from the Cursor.
+//        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
+//                android.R.layout.two_line_list_item,
+//                cursor,
+//                COLUMNS_TO_BE_BOUND,
+//                LAYOUT_ITEMS_TO_FILL,
+//                0);
+//
+//        // Attach the adapter to the ListView.
+//        dictListView.setAdapter(adapter);
     }
 }
